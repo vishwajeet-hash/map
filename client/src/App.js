@@ -4,13 +4,14 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { Room, Star } from "@mui/icons-material";
 import "./app.css";
 import axios from "axios";
-import {format} from "timeago.js"
-
+import { format } from "timeago.js";
 
 function App() {
+  const currentUser = "john";
   const [pins, setPins] = React.useState([]);
   const [zoom, setZoom] = React.useState(5);
   const [currentPlaceId, setCurrentPlaceId] = React.useState(null);
+  const [newPlace, setNewPlace] = React.useState(null);
   // const [showPopup, setShowPopup] = React.useState(true);
   const handleViewStateChange = (viewState) => {
     setZoom(viewState.zoom);
@@ -18,7 +19,13 @@ function App() {
   const handleMarkerClick = (id, lat, long) => {
     setCurrentPlaceId(id);
   };
-
+  const handleAddClick = (e) => {
+    const {lng, lat} = e.lngLat;
+    setNewPlace({
+      lat:lat,                                    //(don't need to write lat:lat )-> ES6 syntax
+      lng:lng,
+    });
+  };
   React.useEffect(() => {
     const getPins = async () => {
       try {
@@ -42,20 +49,28 @@ function App() {
       style={{ width: "100vw", height: "100vh" }}
       mapStyle="mapbox://styles/mapbox/streets-v9"
       onViewStateChange={handleViewStateChange}
+      onDblClick={handleAddClick}
     >
       {pins.map((p) => (
         <React.Fragment key={p._id}>
           <Marker longitude={p.long} latitude={p.lat} anchor="bottom">
-            <Room style={{ fontSize: zoom * 10, color: "slateblue" ,cursor: "pointer" }} onClick={() => handleMarkerClick(p._id)} />
+            <Room
+              style={{
+                fontSize: zoom * 10,
+                color: p.username === currentUser ? "tomato" : "slateblue",
+                cursor: "pointer",
+              }}
+              onClick={() => handleMarkerClick(p._id)}
+            />
           </Marker>
           {p._id === currentPlaceId && (
             <Popup
               longitude={p.long}
               latitude={p.lat}
               closeButton={true}
-                closeOnClick={false}
-                onClose={() => setCurrentPlaceId(null)}
-                anchor="left"
+              closeOnClick={false}
+              onClose={() => setCurrentPlaceId(null)}
+              anchor="left"
               // onClose={() => setShowPopup(false)}
             >
               <div className="card">
@@ -81,7 +96,18 @@ function App() {
           )}
         </React.Fragment>
       ))}
-    </Map>
+      {newPlace && 
+      <Popup
+              longitude={newPlace.lng}
+              latitude={newPlace.lat}
+              closeButton={true}
+              closeOnClick={false}
+              onClose={() => setCurrentPlaceId(null)}
+              anchor="left"
+              // onClose={() => setShowPopup(false)}
+            >hello</Popup>
+      }
+            </Map>
   );
 }
 
