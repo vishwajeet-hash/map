@@ -10,10 +10,13 @@ import {format} from "timeago.js"
 function App() {
   const [pins, setPins] = React.useState([]);
   const [zoom, setZoom] = React.useState(5);
-
-  const [showPopup, setShowPopup] = React.useState(true);
+  const [currentPlaceId, setCurrentPlaceId] = React.useState(null);
+  // const [showPopup, setShowPopup] = React.useState(true);
   const handleViewStateChange = (viewState) => {
     setZoom(viewState.zoom);
+  };
+  const handleMarkerClick = (id, lat, long) => {
+    setCurrentPlaceId(id);
   };
 
   React.useEffect(() => {
@@ -43,14 +46,17 @@ function App() {
       {pins.map((p) => (
         <React.Fragment key={p._id}>
           <Marker longitude={p.long} latitude={p.lat} anchor="bottom">
-            <Room style={{ fontSize: zoom * 10, color: "slateblue" }} />
+            <Room style={{ fontSize: zoom * 10, color: "slateblue" ,cursor: "pointer" }} onClick={() => handleMarkerClick(p._id)} />
           </Marker>
-          {showPopup && (
+          {p._id === currentPlaceId && (
             <Popup
               longitude={p.long}
               latitude={p.lat}
-              anchor="left"
-              onClose={() => setShowPopup(false)}
+              closeButton={true}
+                closeOnClick={false}
+                onClose={() => setCurrentPlaceId(null)}
+                anchor="left"
+              // onClose={() => setShowPopup(false)}
             >
               <div className="card">
                 <label>Place</label>
