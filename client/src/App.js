@@ -13,17 +13,24 @@ function App() {
   const [currentPlaceId, setCurrentPlaceId] = React.useState(null);
   const [newPlace, setNewPlace] = React.useState(null);
   // const [showPopup, setShowPopup] = React.useState(true);
+  const [viewport, setViewport] = React.useState({
+    longitude: 77.1025,
+    latitude: 28.7041,
+    zoom: 5,
+  });
   const handleViewStateChange = (viewState) => {
     setZoom(viewState.zoom);
   };
   const handleMarkerClick = (id, lat, long) => {
+    console.log(123)
     setCurrentPlaceId(id);
+    setViewport({ ...viewport, latitude: lat, longitude: long });
   };
   const handleAddClick = (e) => {
-    const {lng, lat} = e.lngLat;
+    const { lng, lat } = e.lngLat;
     setNewPlace({
-      lat:lat,                                    //(don't need to write lat:lat )-> ES6 syntax
-      lng:lng,
+      lat: lat, //(don't need to write lat:lat )-> ES6 syntax
+      lng: lng,
     });
   };
   React.useEffect(() => {
@@ -40,12 +47,8 @@ function App() {
 
   return (
     <Map
+    {...viewport}
       mapboxAccessToken={process.env.REACT_APP_MAPBOX}
-      initialViewState={{
-        longitude: 77.1025,
-        latitude: 28.7041,
-        zoom: 5,
-      }}
       style={{ width: "100vw", height: "100vh" }}
       mapStyle="mapbox://styles/mapbox/streets-v9"
       onViewStateChange={handleViewStateChange}
@@ -60,7 +63,7 @@ function App() {
                 color: p.username === currentUser ? "tomato" : "slateblue",
                 cursor: "pointer",
               }}
-              onClick={() => handleMarkerClick(p._id)}
+              onClick={() => handleMarkerClick(p._id,p.lat, p.long)}
             />
           </Marker>
           {p._id === currentPlaceId && (
@@ -96,18 +99,20 @@ function App() {
           )}
         </React.Fragment>
       ))}
-      {newPlace && 
-      <Popup
-              longitude={newPlace.lng}
-              latitude={newPlace.lat}
-              closeButton={true}
-              closeOnClick={false}
-              onClose={() => setCurrentPlaceId(null)}
-              anchor="left"
-              // onClose={() => setShowPopup(false)}
-            >hello</Popup>
-      }
-            </Map>
+      {newPlace && (
+        <Popup
+          longitude={newPlace.lng}
+          latitude={newPlace.lat}
+          closeButton={true}
+          closeOnClick={false}
+          onClose={() => setNewPlace(null)}
+          anchor="left"
+          // onClose={() => setShowPopup(false)}
+        >
+          hello
+        </Popup>
+      )}
+    </Map>
   );
 }
 
