@@ -9,17 +9,25 @@ import { format } from "timeago.js";
 function App() {
   const currentUser = "john";
   const [pins, setPins] = React.useState([]);
-  const [zoom, setZoom] = React.useState(5);
+  // const [zoom, setZoom] = React.useState(5);
   const [currentPlaceId, setCurrentPlaceId] = React.useState(null);
   const [newPlace, setNewPlace] = React.useState(null);
+  const [viewState, setViewState] = React.useState({
+    longitude: 77.1025,
+    latitude: 28.7041,
+    zoom: 5,
+  });
   // const [showPopup, setShowPopup] = React.useState(true);
-  const handleViewStateChange = (viewState) => {
-    setZoom(viewState.zoom);
-  };
+  // const handleViewStateChange = (viewState) => {
+  //   setZoom(initialViewState.zoom);
+  //   console.log(viewState);
+  // };
   const handleMarkerClick = (id, lat, long) => {
     setCurrentPlaceId(id);
+    setViewState({...viewState,latitude:lat,longitude:long})
   };
   const handleAddClick = (e) => {
+    console.log("hllo");
     const {lng, lat} = e.lngLat;
     setNewPlace({
       lat:lat,                                    //(don't need to write lat:lat )-> ES6 syntax
@@ -41,14 +49,12 @@ function App() {
   return (
     <Map
       mapboxAccessToken={process.env.REACT_APP_MAPBOX}
-      initialViewState={{
-        longitude: 77.1025,
-        latitude: 28.7041,
-        zoom: 5,
-      }}
+      {...viewState}
+    
       style={{ width: "100vw", height: "100vh" }}
       mapStyle="mapbox://styles/mapbox/streets-v9"
-      onViewStateChange={handleViewStateChange}
+
+      onMove={evt => setViewState(evt.viewState)}
       onDblClick={handleAddClick}
     >
       {pins.map((p) => (
@@ -56,11 +62,11 @@ function App() {
           <Marker longitude={p.long} latitude={p.lat} anchor="bottom">
             <Room
               style={{
-                fontSize: zoom * 10,
+                fontSize: viewState.zoom * 10,
                 color: p.username === currentUser ? "tomato" : "slateblue",
                 cursor: "pointer",
               }}
-              onClick={() => handleMarkerClick(p._id)}
+              onClick={() => handleMarkerClick(p._id,p.lat,p.long)}
             />
           </Marker>
           {p._id === currentPlaceId && (
@@ -102,7 +108,8 @@ function App() {
               latitude={newPlace.lat}
               closeButton={true}
               closeOnClick={false}
-              onClose={() => setCurrentPlaceId(null)}
+              // onClose={() => setCurrentPlaceId(null)}
+              onClose={() => setNewPlace(null)}
               anchor="left"
               // onClose={() => setShowPopup(false)}
             >hello</Popup>
